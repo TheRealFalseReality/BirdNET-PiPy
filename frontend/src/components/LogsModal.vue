@@ -7,34 +7,84 @@
     />
 
     <!-- Modal -->
-    <div class="flex min-h-full items-center justify-center p-4">
+    <div
+      :class="[
+        'flex min-h-full items-center justify-center',
+        isFullscreen ? 'p-0' : 'p-4'
+      ]"
+    >
       <div
-        class="relative bg-white rounded-xl shadow-xl w-full max-w-5xl flex flex-col"
-        style="max-height: 90vh;"
+        :class="[
+          'relative bg-white shadow-xl flex flex-col',
+          isFullscreen
+            ? 'fixed inset-0 rounded-none z-10'
+            : 'rounded-xl w-full max-w-5xl'
+        ]"
+        :style="isFullscreen ? '' : 'max-height: 90vh;'"
       >
         <!-- Header -->
         <div class="flex items-center justify-between p-4 border-b border-gray-200">
           <h2 class="text-lg font-semibold text-gray-900">
             System Logs
           </h2>
-          <button
-            class="text-gray-400 hover:text-gray-600"
-            @click="$emit('close')"
-          >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+          <div class="flex items-center gap-2">
+            <!-- Fullscreen toggle -->
+            <button
+              :title="isFullscreen ? 'Exit fullscreen' : 'Fullscreen'"
+              class="text-gray-400 hover:text-gray-600"
+              @click="isFullscreen = !isFullscreen"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
+              <!-- Expand icon -->
+              <svg
+                v-if="!isFullscreen"
+                class="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"
+                />
+              </svg>
+              <!-- Shrink icon -->
+              <svg
+                v-else
+                class="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 9V4m0 5H4m5 0L3 3m12 6h5m-5 0V4m0 5l6-6M9 15v5m0-5H4m5 5l-6 6m12-6h5m-5 0v5m0-5l6 6"
+                />
+              </svg>
+            </button>
+            <!-- Close -->
+            <button
+              class="text-gray-400 hover:text-gray-600"
+              @click="$emit('close')"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <!-- Filter bar -->
@@ -80,6 +130,19 @@
             @click="clearFilters"
           >
             Clear
+          </button>
+
+          <button
+            :class="[
+              'text-sm px-3 py-1.5 rounded',
+              wrapLines
+                ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            ]"
+            title="Toggle line wrapping"
+            @click="wrapLines = !wrapLines"
+          >
+            {{ wrapLines ? 'Wrap ON' : 'Wrap OFF' }}
           </button>
 
           <button
@@ -134,7 +197,7 @@
               <div
                 v-for="(entry, i) in displayEntries"
                 :key="i"
-                class="whitespace-pre"
+                :class="wrapLines ? 'whitespace-pre-wrap break-all' : 'whitespace-pre'"
               >
                 <span class="text-gray-500">{{ formatTimestamp(entry.timestamp) }}</span>
                 <span :class="levelClass(entry.level)">{{ padLevel(entry.level) }}</span>
@@ -192,6 +255,8 @@ export default {
 
     const logContainer = ref(null)
     const isAtBottom = ref(true)
+    const isFullscreen = ref(false)
+    const wrapLines = ref(false)
     let searchTimeout = null
 
     // Reverse: API returns newest-first, we want oldest-first (newest at bottom)
@@ -281,6 +346,7 @@ export default {
       serviceFilter, searchQuery, isPolling,
       applyFilters, clearFilters,
       logContainer, isAtBottom,
+      isFullscreen, wrapLines,
       levelClass, padLevel, formatTimestamp, hasExtras, formatExtras,
       onScroll, scrollToBottom, togglePolling, onSearchInput
     }
