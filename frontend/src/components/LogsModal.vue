@@ -31,6 +31,8 @@
             <!-- Fullscreen toggle -->
             <button
               :title="isFullscreen ? 'Exit fullscreen' : 'Fullscreen'"
+              :aria-label="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
+              :aria-pressed="isFullscreen"
               class="text-gray-400 hover:text-gray-600"
               @click="isFullscreen = !isFullscreen"
             >
@@ -67,6 +69,8 @@
             </button>
             <!-- Close -->
             <button
+              title="Close"
+              aria-label="Close logs modal"
               class="text-gray-400 hover:text-gray-600"
               @click="$emit('close')"
             >
